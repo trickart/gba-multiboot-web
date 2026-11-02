@@ -1,0 +1,13 @@
+# ビルド成果物
+firmware/build/
+web/dist/
+web/node_modules/
+*.uf2
+*.elf
+*.bin
+!firmware/prebuilt/*.uf2
+.DS_Store
+.build/
+web/public/core.wasm
+.swiftpm/
+.swift-version

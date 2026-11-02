@@ -1,0 +1,15 @@
+// CMake により生成される基板設定 (firmware/CMakeLists.txt の set(...) を参照)
+#pragma once
+
+#define FW_VERSION_MAJOR  @FW_VERSION_MAJOR@
+#define FW_VERSION_MINOR  @FW_VERSION_MINOR@
+#define FW_VERSION_PATCH  @FW_VERSION_PATCH@
+
+#define USB_VID           @USB_VID@
+#define USB_PID           @USB_PID@
+
+// GBA リンクポート配線 (RP2040 視点の信号名)
+#define LINK_PIN_SC       @LINK_PIN_SC@
+#define LINK_PIN_SI       @LINK_PIN_SI@
+#define LINK_PIN_SO       @LINK_PIN_SO@
+#define LINK_PIN_SD       @LINK_PIN_SD@

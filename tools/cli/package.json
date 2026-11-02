@@ -1,0 +1,10 @@
+{
+  "name": "gba-multiboot-cli",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Node (serialport) からファームウェアへ Multiboot ROM を送る開発用 CLI",
+  "bin": { "gba-mb-upload": "./upload.mjs" },
+  "dependencies": { "serialport": "^13.0.0" },
+  "license": "MIT"
+}

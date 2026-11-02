@@ -1,0 +1,21 @@
+;
+; GBA リンクポート用 32bit SPI マスタ (Normal mode / CPOL=1, CPHA=1)
+;
+; pico-examples の pio/spi/spi.pio (spi_cpha1) を元にしています。
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+; SPDX-License-Identifier: BSD-3-Clause
+;
+; ピン割り当て (GBA-PICO-LINK / Game-Boy-Zero-Link-Board):
+;   SCK  = side-set pin 0  -> GPIO0 (SC)   GPIO 出力反転で CPOL=1 (アイドル High)
+;   MOSI = OUT pin 0       -> GPIO2 (SO)   RP2040 -> GBA(SI)
+;   MISO = IN  pin 0       -> GPIO1 (SI)   GBA(SO) -> RP2040
+;
+; 1bit = 4 PIO サイクル。SC は立ち下がりでデータ確定、立ち上がりでサンプル。
+; Autopull/Autopush 有効、閾値 32bit、左シフト (MSB first) で使用する。
+.pio_version 0
+
+.program linkport_spi
+.side_set 1
+    out x, 1    side 0     ; TX FIFO が空ならここで停止 (SC はアイドル状態)
+    mov pins, x side 1 [1] ; データ出力 + SC アサート(反転後 Low)
+    in pins, 1  side 0     ; データ取り込み + SC デアサート(反転後 High)

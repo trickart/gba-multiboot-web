@@ -1,0 +1,57 @@
+name: Build Firmware (RP2040, Embedded Swift)
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SWIFT_VERSION: 6.4.2
+
+jobs:
+  firmware:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch pico-sdk (+ TinyUSB のみ)
+        run: |
+          git submodule update --init --depth 1 firmware/lib/pico-sdk
+          git -C firmware/lib/pico-sdk submodule update --init --depth 1 lib/tinyusb
+
+      - name: Install Arm toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib ninja-build
+
+      - name: Install Swift (swiftly)
+        uses: ./.github/actions/setup-swift
+        with:
+          version: ${{ env.SWIFT_VERSION }}
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Configure & build
+        run: |
+          cmake -S firmware -B firmware/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_Swift_COMPILER="$(which swiftc)"
+          cmake --build firmware/build
+          arm-none-eabi-size firmware/build/gba_link.elf
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gba_link-firmware
+          path: |
+            firmware/build/gba_link.uf2
+            firmware/build/gba_link.elf
+
+      - name: Release (tag のみ)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: firmware/build/gba_link.uf2

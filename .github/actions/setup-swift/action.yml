@@ -1,0 +1,27 @@
+name: Setup Swift (swiftly)
+description: Ubuntu ランナーに swift.org の Swift ツールチェーンを swiftly でインストールする
+inputs:
+  version:
+    description: Swift のバージョン (例 6.4.2)
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Install Swift runtime dependencies (Ubuntu 24.04)
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          binutils git gnupg2 libc6-dev libcurl4-openssl-dev libedit2 libgcc-13-dev \
+          libncurses-dev libpython3-dev libsqlite3-0 libstdc++-13-dev libxml2-dev \
+          libz3-dev pkg-config tzdata unzip zlib1g-dev
+    - name: Install swiftly and Swift ${{ inputs.version }}
+      shell: bash
+      run: |
+        curl -fsSL -O "https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz"
+        tar zxf "swiftly-$(uname -m).tar.gz"
+        ./swiftly init --assume-yes --skip-install --quiet-shell-followup
+        . "$HOME/.local/share/swiftly/env.sh"
+        swiftly install --use "${{ inputs.version }}"
+        echo "$HOME/.local/share/swiftly/bin" >> "$GITHUB_PATH"
+        swift --version
