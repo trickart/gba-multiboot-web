@@ -34,10 +34,9 @@ jobs:
         with:
           version: ${{ env.SWIFT_VERSION }}
 
-      - uses: lukka/get-cmake@latest
-
       - name: Configure & build
         run: |
+          cmake --version
           cmake -S firmware -B firmware/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_Swift_COMPILER="$(which swiftc)"
           cmake --build firmware/build
@@ -52,6 +51,12 @@ jobs:
 
       - name: Release (tag のみ)
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: firmware/build/gba_link.uf2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" firmware/build/gba_link.uf2 --clobber
+          else
+            gh release create "$TAG" firmware/build/gba_link.uf2 --title "$TAG" --verify-tag
+          fi
